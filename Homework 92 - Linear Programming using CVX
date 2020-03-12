@@ -1,0 +1,127 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "CS164PW92.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "authorship_tag": "ABX9TyNwrUl2mqFZN0QMlLpZWot7"
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "g6TUu4Owpe_x",
+        "colab_type": "text"
+      },
+      "source": [
+        "#### CS164 Pre-Class Work for Session 9.2\n",
+        "\n",
+        "### Linear Programming\n",
+        "_Yoav Rabinovich, Mar 20_\n",
+        "\n",
+        "------------"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "uTM69SLCpnRd",
+        "colab_type": "text"
+      },
+      "source": [
+        "_Use CVXPY to solve the following optimization problem:_\n",
+        "\n",
+        "_A farmer has 240 acres to plant. He needs to decide how many acres of\n",
+        "corn to plant and how many of oats. He can make \\\\$40 per acre profit for\n",
+        "corn and \\\\$30 per acre for oats. However, the corn takes 2 hours of labor\n",
+        "per acre to harvest and the oats only take 1 hour per acre. He only has\n",
+        "320 hours of labor he can invest. To maximize his profit, how many acres\n",
+        "of each should he plant?_\n",
+        "\n",
+        "We express the problem as a linear program with four constraints. While this makes a small difference when using CVX, we'll still stick with our best practices and express the maximization problem as the minimization of the negated objective function and the constraints as non-positivity constraints:\n",
+        "\n",
+        "$$\\begin{align*}\n",
+        "\\min_{x,y} \\ f(x,y) &= -40x-30y\\\\\n",
+        "\\text{s.t:} \\ x+y-240 &\\leq 0\\\\\n",
+        "2x+y-320 &\\leq 0 \\\\\n",
+        "-x,-y &\\leq 0\n",
+        "\\end{align*}$$\n",
+        "\n",
+        "And then we use the CVPY package as seen in the [tutorial](https://www.cvxpy.org/tutorial/intro/index.html) to find the solution: "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "tTzviSUupa9O",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "!pip install cvxpy"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ZGCq3o6fpenx",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 67
+        },
+        "outputId": "fa4bebcd-81b7-437b-87a7-63c32b5ad060"
+      },
+      "source": [
+        "import cvxpy as cp\n",
+        "import numpy as np\n",
+        "\n",
+        "# Define scalar optimization variables\n",
+        "x = cp.Variable()\n",
+        "y = cp.Variable()\n",
+        "\n",
+        "# Define objective function\n",
+        "obj = cp.Minimize(-40*x-30*y)\n",
+        "\n",
+        "# Define constraints\n",
+        "constraints = [x + y - 240 <= 0,\n",
+        "               2*x + y - 320 <= 0,\n",
+        "               -x <= 0,\n",
+        "               -y <= 0]\n",
+        "\n",
+        "# Define problem\n",
+        "prob = cp.Problem(obj, constraints)\n",
+        "\n",
+        "# Solve problem\n",
+        "prob.solve()\n",
+        "\n",
+        "# Print solution\n",
+        "print(\"Status:\", prob.status)\n",
+        "print(\"Profit: $\", -np.round(prob.value))\n",
+        "print(\"Solution:\", np.round(x.value),\"acres of corn and\",\n",
+        "      np.round(y.value),\"acres of oats.\")"
+      ],
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Status: optimal\n",
+            "Profit: $ 8000.0\n",
+            "Solution: 80.0 acres of corn and 160.0 acres of oats.\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    }
+  ]
+}
